@@ -2,7 +2,7 @@ import os
 
 from nuscenes.nuscenes import NuScenes
 
-DATAROOT = "./nuscenes"
+DATAROOT = "./data"
 
 nusc = NuScenes(version='v1.0-mini', dataroot=DATAROOT, verbose=True)
 
