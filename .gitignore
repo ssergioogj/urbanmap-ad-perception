@@ -219,6 +219,7 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# Nuscenes
+# Data
 data/
-v1.0-mini.tgz
+*.tgz
+*.tar.gz
