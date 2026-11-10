@@ -1,7 +1,7 @@
 # UrbanMap: Multi-Camera BEV Perception for Autonomous Driving
 
 [![Status: In Progress](https://img.shields.io/badge/Status-In%20Progress-amber.svg)](https://github.com/ssergioogj/urbanmap-ad-perception)
-[![Python 3.12](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.0%2B-EE4C2C.svg)](https://pytorch.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
