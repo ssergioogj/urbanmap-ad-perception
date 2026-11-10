@@ -6,6 +6,7 @@ on:
 
 jobs:
   mirror:
+    if: github.repository != 'ssergioogj/urbanmap-ad-perception'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
