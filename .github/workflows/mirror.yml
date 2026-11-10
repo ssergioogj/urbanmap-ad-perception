@@ -1,8 +1,8 @@
-name: Mirror to Outside Repository
+name: Mirror to Secondary Repository
 
 on:
   push:
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   mirror:
@@ -13,10 +13,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Mirror to destination repository
-        uses: wearerequired/git-mirror-action@v1
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DESTINATION_SSH_KEY }}
-        with:
-          source-repo: ${{ github.repositoryUrl }}
-          destination-repo: "git@github.com:ssergiogj/urbanmap-ad-perception.git"
+      - name: Configure SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DESTINATION_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -t ed25519,rsa github.com >> ~/.ssh/known_hosts
+
+      - name: Push mirror to destination
+        run: |
+          git push --mirror --prune git@github.com:ssergioogj/urbanmap-ad-perception.git
