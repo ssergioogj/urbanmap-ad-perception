@@ -1,0 +1,22 @@
+name: Mirror to Outside Repository
+
+on:
+  push:
+  workflow_dispatch: 
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Mirror to destination repository
+        uses: wearerequired/git-mirror-action@v1
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.DESTINATION_SSH_KEY }}
+        with:
+          source-repo: ${{ github.repositoryUrl }}
+          destination-repo: "git@github.com:ssergiogj/urbanmap-ad-perception.git"
