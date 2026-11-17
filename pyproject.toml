@@ -25,6 +25,3 @@ dev = [
     "ruff>=0.4.0",
     "pytest>=8.0.0",
 ]
-
-[tool.setuptools]
-py-modules = ["nuscenes", "data_loader", "lss"]
