@@ -8,7 +8,7 @@ There are no learnable parameters in this transformation
 import torch
 
 
-def create_frustum(image_size=(128, 352), downsample=8, dbound=(4.0, 45.0, 1.0)):
+def create_frustum(image_size=(128, 352), downsample=16, dbound=(4.0, 45.0, 1.0)):
     """Rack (u, v, d) of all the points of the frustrum of one camera"""
     H, W = image_size
     Hf, Wf = H // downsample, W // downsample
@@ -17,7 +17,7 @@ def create_frustum(image_size=(128, 352), downsample=8, dbound=(4.0, 45.0, 1.0))
     D = depths.shape[0]
 
     # Center of each cell in pixels
-    # Cell j covers the pixels [8j, 8j+7]
+    # Cell j covers the pixels [16j, 16j+15] -> center 16j + 7.5
     us = (torch.arange(Wf, dtype=torch.float32) + 0.5) * downsample - 0.5   # (Wf)
     vs = (torch.arange(Hf, dtype=torch.float32) + 0.5) * downsample - 0.5   # (Hf)
 

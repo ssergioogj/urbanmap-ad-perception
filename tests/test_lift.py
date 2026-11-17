@@ -25,7 +25,7 @@ DATAROOT = ROOT / "data"
 H, W = 128, 352
 D_BINS = 41
 C = 64
-STRIDE = 8  # out_indices=(2, 4) -> el frustum sale a resolución 1/8, cambiar a (3, 4) si queremos que salga como en el paper 1/16
+STRIDE = 16  # out_indices=(3, 4) -> el frustum sale a resolución 1/16
 CAMS = ["CAM_FRONT_LEFT", "CAM_FRONT", "CAM_FRONT_RIGHT",
         "CAM_BACK_LEFT", "CAM_BACK", "CAM_BACK_RIGHT"]
 
@@ -60,9 +60,9 @@ def test_output_shapes(outputs):
     assert frustum.shape == (2, 6, D_BINS, C, hf, wf)
 
 
-def test_feature_stride_is_8(model):
+def test_feature_stride_is_16(model):
     # Splat tendrá que construir el frustum con este mismo stride.
-    assert model.image_backbone.feature_info.reduction() == [8, 32]
+    assert model.image_backbone.feature_info.reduction() == [16, 32]
 
 
 # --------------------------------------------------------------------------

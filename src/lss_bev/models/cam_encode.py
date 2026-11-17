@@ -30,7 +30,7 @@ class CamEncode(nn.Module):
     """
 
     # Lift step is defined as following:
-    # 1. Extract features from the image with the EfficientNet backbone (Deep feature map (c4): low resolution and high semantic info, Shallow map (c2): high resoltion and low semantic info)
+    # 1. Extract features from the image with the EfficientNet backbone (Deep feature map (c4): low resolution and high semantic info, Shallow map (c3): high resoltion and low semantic info)
     # 2. Mix the features in a intermediate resolution map
     # 3. Predicts a discrete probability distribution over the depth and a context features vector for each pixel
     # 4. Computes the outer product (DxC) to generate a 3D visual cone (frustum of features)
@@ -44,15 +44,15 @@ class CamEncode(nn.Module):
             backbone_name, 
             pretrained=pretrained,  # Trained with ImageNet
             features_only=True,     # Extracts intermediate maps without classification head
-            out_indices=(2,4)       # Selects step C2 (stride 8) and C4 (stride 32)
+            out_indices=(3,4)       # Selects step C3 (stride 16) and C4 (stride 32)
         )
 
         feature_info = self.image_backbone.feature_info.channels()
 
-        c2_dim = feature_info[0]
+        c3_dim = feature_info[0]
         c4_dim = feature_info[1]
 
-        self.neck = Up(in_channels=c4_dim, skip_channels=c2_dim, out_channels=128)
+        self.neck = Up(in_channels=c4_dim, skip_channels=c3_dim, out_channels=128)
 
         self.depth_context_conv = nn.Conv2d(in_channels=128, out_channels=self.d_bins + self.c_chanels, kernel_size=1, padding=0)
 
@@ -79,10 +79,10 @@ class CamEncode(nn.Module):
         # Extract features
         features = self.image_backbone(x)
 
-        c2, c4 = features[0], features[1]
+        c3, c4 = features[0], features[1]
 
-        # Scales c4 to spatial size of c2 and combine channels
-        fusion = self.neck(c4, c2)
+        # Scales c4 to spatial size of c3 and combine channels
+        fusion = self.neck(c4, c3)
 
         # 1x1 proyection D+C channels
         out = self.depth_context_conv(fusion)

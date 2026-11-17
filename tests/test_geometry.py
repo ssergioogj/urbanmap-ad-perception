@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DATAROOT = ROOT / "data"
 HAS_MINI = (DATAROOT / "v1.0-mini").exists()
 
-H, W, STRIDE = 128, 352, 8
+H, W, STRIDE = 128, 352, 16
 # Preprocesado de ejemplo: 1600x900 -> x0.22 -> 352x198 -> recorte de 48 filas arriba -> 352x128
 SCALE, CROP_TOP = 0.22, 48
 
@@ -49,7 +49,7 @@ def to_ego(frustum, K, R=torch.eye(3), t=torch.zeros(3)):
 # --------------------------------------------------------------------------
 def test_frustum_shape_and_depths():
     fr = create_frustum((H, W), STRIDE, (4.0, 45.0, 1.0))
-    assert fr.shape == (41, 16, 44, 3)
+    assert fr.shape == (41, 8, 22, 3)
     depths = fr[:, 0, 0, 2]
     assert torch.equal(depths, torch.arange(4.0, 45.0, 1.0))   # 4, 5, ..., 44
 
@@ -57,8 +57,8 @@ def test_frustum_shape_and_depths():
 def test_frustum_pixel_centers():
     fr = create_frustum((H, W), STRIDE)
     us, vs = fr[0, 0, :, 0], fr[0, :, 0, 1]
-    assert us[0] == 3.5 and us[-1] == W - 4.5          # centro de la primera y última celda
-    assert vs[0] == 3.5 and vs[-1] == H - 4.5
+    assert us[0] == 7.5 and us[-1] == W - 8.5          # centro de la primera y última celda
+    assert vs[0] == 7.5 and vs[-1] == H - 8.5
     assert torch.allclose(us.diff(), torch.full_like(us.diff(), STRIDE))
 
 
@@ -130,7 +130,7 @@ def test_batch_and_cameras_shapes():
     R = torch.eye(3).expand(B, N, 3, 3)
     t = torch.randn(B, N, 3)
     geom = frustum_to_ego(fr, K, R, t)
-    assert geom.shape == (B, N, 41, 16, 44, 3)
+    assert geom.shape == (B, N, 41, 8, 22, 3)
     # cada cámara usa su propia traslación
     assert torch.allclose(geom[1, 3] - geom[0, 0], t[1, 3] - t[0, 0], atol=1e-4)
 
@@ -170,7 +170,7 @@ def test_each_camera_looks_where_it_should(real):
                     "CAM_BACK": 180, "CAM_BACK_LEFT": 110, "CAM_BACK_RIGHT": -110}
     d20 = 16                                            # índice de 20 m (20 - 4)
     for n, cam in enumerate(CAMS):
-        x, y, _ = geom[n, d20, 8, 22]
+        x, y, _ = geom[n, d20, 4, 11]                 # celda central de la cuadrícula 8x22
         ang = math.degrees(math.atan2(y, x))
         diff = (ang - expected_deg[cam] + 180) % 360 - 180
         assert abs(diff) < 15, f"{cam}: {ang:.0f}º, esperado ~{expected_deg[cam]}º"
@@ -181,7 +181,7 @@ def test_horizon_and_ground(real):
     """Con las cámaras a ~1.5 m, la fila de arriba apunta por encima del suelo y
     la de abajo hacia el suelo: a 20 m la z de abajo debe ser menor."""
     _, _, _, geom = real
-    top, bottom = geom[1, 16, 0, 22, 2], geom[1, 16, -1, 22, 2]
+    top, bottom = geom[1, 16, 0, 11, 2], geom[1, 16, -1, 11, 2]
     assert top > bottom
     assert bottom < 0.5
 

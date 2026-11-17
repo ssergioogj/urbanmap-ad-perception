@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[1]
-H, W, STRIDE = 128, 352, 8
+H, W, STRIDE = 128, 352, 16
 SCALE, CROP_TOP = 0.22, 48
 COLORS = ["#1b9e77", "#d95f02", "#7570b3", "#e7298a", "#66a61e", "#e6ab02"]
 
