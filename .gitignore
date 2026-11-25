@@ -221,5 +221,6 @@ __marimo__/
 
 # Data
 data/
+outputs/
 *.tgz
 *.tar.gz
