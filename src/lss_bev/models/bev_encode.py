@@ -4,6 +4,12 @@ import torch.nn.functional as F
 from torchvision.models.resnet import resnet18, BasicBlock
 
 class BevEncode(nn.Module):
+    """Bird's-eye-view CNN.
+    Takes the Splat map (B, C, 200, 200), fills the gaps between the camera rays,
+    mixes the information of neighbouring cells and predicts one logit per cell
+    and class: (B, out_channels, 200, 200). Trained from scratch (no pretrained weights).
+    """
+
     def __init__(self, in_channels: int = 64, out_channels: int = 1):
         super().__init__()
         trunk = resnet18(weights=None)
@@ -15,7 +21,7 @@ class BevEncode(nn.Module):
 
         # 3 First Meta-layers
         self.layer1 = trunk.layer1  # x1: (B, 64, 100, 100)
-        self.layer2 = trunk.layer2  # x2: (B, 120, 50, 50)
+        self.layer2 = trunk.layer2  # x2: (B, 128, 50, 50)
         self.layer3 = trunk.layer3  # x3: (B, 256, 25, 25)
 
         # Upsample of x3 by a factor of 4 and concatenate with x1
@@ -26,7 +32,7 @@ class BevEncode(nn.Module):
             BasicBlock(128, 128)
         )
 
-        # Unsample x2 to restore 200x200 grid and project output channels
+        # Upsample x2 (100 -> 200) to restore the 200x200 grid and project to the output channels
         self.out_head = nn.Sequential(
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True),
             nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, padding=1, bias=False),
@@ -41,9 +47,9 @@ class BevEncode(nn.Module):
         # Meta layers
         x1 = self.layer1(x)
         x2 = self.layer2(x1)
-        x3= self.layer3(x2)
+        x3 = self.layer3(x2)
 
-        # Upsample de x3
+        # Upsample x3 (25 -> 100)
         x3_up = F.interpolate(input=x3, size=x1.shape[-2:], mode="bilinear", align_corners=True)
         x_cat = torch.cat([x3_up, x1], dim=1)
 
