@@ -104,10 +104,10 @@ on the nuScenes website, so it is not included in this repository or in the deli
 
 ### Trained models
 
-The delivery ZIP includes the three checkpoints behind the results table, with their training logs:
-`runs/mini-lss/`, `runs/mini-cnn/` and `runs/mini-frozen/` (`best.pt`, ~31 MB each, and `log.csv`).
-With them the results can be reproduced without training (`scripts/evaluate.py`, see Usage).
-They are not in git.
+The trained models are not included: generate them with the three training commands in Usage
+(`runs/mini-lss`, `runs/mini-cnn`, `runs/mini-frozen`). Each takes about 25 minutes on an Apple M4
+(GPU via MPS); on a CPU it is much slower. The quick sanity check (`--overfit 4`) takes about 2 minutes.
+The figures and the results table are generated the same way, with the scripts in Usage.
 
 ## Usage
 

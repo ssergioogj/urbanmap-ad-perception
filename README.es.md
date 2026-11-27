@@ -108,10 +108,10 @@ uso en la web de nuScenes, así que no se incluye en el repositorio ni en el ZIP
 
 ### Modelos entrenados
 
-El ZIP de la entrega incluye los tres modelos de la tabla de resultados, con sus registros de
-entrenamiento: `runs/mini-lss/`, `runs/mini-cnn/` y `runs/mini-frozen/` (`best.pt`, ~31 MB cada uno,
-y `log.csv`). Con ellos se reproducen los resultados sin entrenar (`scripts/evaluate.py`, ver Uso).
-No están en git.
+Los modelos entrenados no se incluyen: se generan con los tres comandos de entrenamiento del
+apartado Uso (`runs/mini-lss`, `runs/mini-cnn`, `runs/mini-frozen`). Cada uno tarda unos 25 minutos
+en un Apple M4 (GPU con MPS); en CPU, bastante más. La prueba rápida (`--overfit 4`) tarda unos
+2 minutos. Las figuras y la tabla de resultados se generan igual, con los scripts del apartado Uso.
 
 ## Uso
 
