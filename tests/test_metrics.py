@@ -2,6 +2,7 @@
 import torch
 
 from lss_bev.metrics import IoUMeter
+from lss_bev.metrics import SegmentationMeter
 
 BIG = 20.0   # logit whose sigmoid is ~1
 
@@ -41,12 +42,7 @@ def test_empty_is_zero():
     assert m.compute() == 0.0
 
 
-# --------------------------------------------------------------------------
 # SegmentationMeter: precision, recall and IoU by distance
-# --------------------------------------------------------------------------
-from lss_bev.metrics import SegmentationMeter  # noqa: E402
-
-
 def test_precision_recall_hand_computed():
     """Same example as above: TP 1, FP 1, FN 2."""
     m = SegmentationMeter(bands=())
@@ -71,3 +67,14 @@ def test_iou_by_distance():
     r = m.compute()
     assert r["iou_0-10m"] == 1.0 and r["iou_30-50m"] == 0.0
     assert r["iou"] == 0.5
+
+
+def test_accuracy_is_misleading():
+    """A model that predicts nothing gets a high accuracy but IoU 0."""
+    m = SegmentationMeter(bands=())
+    label = torch.zeros(1, 1, 200, 200)
+    label[..., 100:110, 100:110] = 1                   # 100 of 40000 cells
+    m.update(torch.full_like(label, -BIG), label)
+    r = m.compute()
+    assert r["accuracy"] == 1 - 100 / 40000 and r["iou"] == 0.0
+    assert r["empty_model_accuracy"] == r["accuracy"]

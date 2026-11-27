@@ -3,7 +3,7 @@ Evaluate trained checkpoints on the validation split and print the results table
 
     uv run python scripts/evaluate.py runs/mini-lss/best.pt runs/mini-cnn/best.pt runs/mini-frozen/best.pt
 
-Prints IoU (the paper metric), precision, recall and IoU by distance to the car,
+Prints IoU (the paper metric), precision, recall, accuracy and IoU by distance to the car,
 next to the paper numbers (Table 1, nuScenes "Vehicles"), and saves
 outputs/results.csv.
 """
@@ -39,6 +39,7 @@ def main():
     p.add_argument("--batch-size", type=int, default=4)
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--device", default="auto")
+    p.add_argument("--out", default=str(ROOT / "outputs" / "results.csv"))
     args = p.parse_args()
 
     device = pick_device(args.device)
@@ -61,18 +62,20 @@ def main():
         print(f"evaluated {path}: IoU {100 * r['iou']:.2f}")
 
     bands = [k for k in rows[0] if k.startswith("iou_")]
-    header = ["Model", "IoU", "Paper IoU", "Precision", "Recall"] + [b[4:] for b in bands]
+    header = ["Model", "IoU", "Paper IoU", "Precision", "Recall", "Accuracy"] + [b[4:] for b in bands]
     print("\n| " + " | ".join(header) + " |")
     print("|" + "---|" * len(header))
     for r in rows:
         paper = f"{r['paper_iou']:.2f}" if r["paper_iou"] else "-"
         cells = [r["model"], f"{100 * r['iou']:.2f}", paper,
-                 f"{100 * r['precision']:.1f}", f"{100 * r['recall']:.1f}"]
+                 f"{100 * r['precision']:.1f}", f"{100 * r['recall']:.1f}", f"{100 * r['accuracy']:.2f}"]
         cells += [f"{100 * r[b]:.1f}" for b in bands]
         print("| " + " | ".join(cells) + " |")
     print(f"\n{len(val)} validation samples ({args.version}). Values in %.")
+    print(f"Accuracy of a model that never predicts a vehicle: {100 * rows[0]['empty_model_accuracy']:.2f}% "
+          "(why accuracy is not a useful metric here).")
 
-    out = ROOT / "outputs" / "results.csv"
+    out = Path(args.out)
     out.parent.mkdir(exist_ok=True)
     with open(out, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))

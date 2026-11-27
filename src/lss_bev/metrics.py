@@ -30,7 +30,7 @@ class IoUMeter:
 
 
 class SegmentationMeter:
-    """IoU, precision and recall, overall and by distance to the ego car.
+    """IoU, precision, recall and accuracy, overall and by distance to the ego car.
 
     Everything is accumulated over the whole set and divided at the end.
     Distance bands are measured from the car center to the center of each cell.
@@ -44,7 +44,7 @@ class SegmentationMeter:
         ys = torch.arange(ybound[0] + ybound[2] / 2, ybound[1], ybound[2])
         gx, gy = torch.meshgrid(xs, ys, indexing="ij")
         self.dist = torch.sqrt(gx ** 2 + gy ** 2)                     # (nx, ny) meters
-        self.tp = self.fp = self.fn = 0
+        self.tp = self.fp = self.fn = self.tn = 0
         self.band_inter = [0] * len(bands)
         self.band_union = [0] * len(bands)
 
@@ -55,6 +55,7 @@ class SegmentationMeter:
         self.tp += (pred & gt).sum().item()
         self.fp += (pred & ~gt).sum().item()
         self.fn += (~pred & gt).sum().item()
+        self.tn += (~pred & ~gt).sum().item()
         for k, (lo, hi) in enumerate(self.bands):
             ring = (self.dist >= lo) & (self.dist < hi)
             self.band_inter[k] += (pred & gt & ring).sum().item()
@@ -64,7 +65,11 @@ class SegmentationMeter:
         div = lambda a, b: a / b if b else 0.0  # noqa: E731
         out = dict(iou=div(self.tp, self.tp + self.fp + self.fn),
                    precision=div(self.tp, self.tp + self.fp),
-                   recall=div(self.tp, self.tp + self.fn))
+                   recall=div(self.tp, self.tp + self.fn),
+                   # accuracy is misleading here: >95% of the cells are empty, so a model
+                   # that never predicts a vehicle already gets a very high accuracy
+                   accuracy=div(self.tp + self.tn, self.tp + self.tn + self.fp + self.fn),
+                   empty_model_accuracy=div(self.tn + self.fp, self.tp + self.tn + self.fp + self.fn))
         for (lo, hi), i, u in zip(self.bands, self.band_inter, self.band_union):
             out[f"iou_{lo}-{hi}m"] = div(i, u)
         return out
