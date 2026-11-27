@@ -42,6 +42,22 @@ def adjust_intrinsics(intrins, scale, crop_top=0.0, crop_left=0.0):
     return K
 
 
+def flip_intrinsics(intrins, width):
+    """Intrinsics of a horizontally flipped image of the given width.
+    Flipping sends pixel column u to (width - 1) - u. Since u = fx * X/Z + cx,
+    the flipped image behaves like a camera with fx -> -fx and cx -> width - 1 - cx.
+    The 3D geometry (R, t) does not change, so the labels do not change either.
+    Args:
+        intrins: (..., 3, 3)
+    Returns:
+        (..., 3, 3)
+    """
+    K = intrins.clone()
+    K[..., 0, 0] = -K[..., 0, 0]
+    K[..., 0, 2] = (width - 1) - K[..., 0, 2]
+    return K
+
+
 def frustum_to_ego(frustum, intrins, rots, trans):
     """Pass all the points (u, v, d) of the frustrum to coordinates of the vehicle"""
     B, N = intrins.shape[:2]
