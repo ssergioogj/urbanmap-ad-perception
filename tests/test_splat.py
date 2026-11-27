@@ -199,7 +199,7 @@ def test_lift_splat_end_to_end(real_geom):
     model = LiftSplat(pretrained=False)
     imgs = torch.randn(1, 6, 3, H, W)
     bev = model(imgs, K[None], cal["rots"][None], cal["trans"][None])
-    assert bev.shape == (1, 64, 200, 200)
+    assert bev.shape == (1, 1, 200, 200)
     assert torch.isfinite(bev).all()
     bev.pow(2).mean().backward()
     g = model.cam_encode.image_backbone.conv_stem.weight.grad
