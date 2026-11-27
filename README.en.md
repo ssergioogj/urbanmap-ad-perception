@@ -79,6 +79,9 @@ Requires [uv](https://docs.astral.sh/uv/) and Python 3.12 (uv installs it if mis
 uv sync --extra dev
 ```
 
+Main dependencies (exact versions in `uv.lock`): PyTorch and torchvision, timm (EfficientNet-B0),
+nuscenes-devkit (official splits), pyquaternion, Pillow, matplotlib; pytest for the tests.
+
 On **Windows with an NVIDIA GPU**, PyPI only has CPU builds of PyTorch: install the CUDA build
 (see pytorch.org) or training will silently run on the CPU.
 
@@ -95,6 +98,16 @@ data/
 Only the camera images, the calibration and the 3D annotations are used (no LiDAR or radar data).
 Other versions (e.g. `v1.0-trainval`, even a partial download) work with `--version`; samples
 with missing images are skipped.
+
+**License.** nuScenes is distributed under CC BY-NC-SA 4.0 and requires accepting its terms of use
+on the nuScenes website, so it is not included in this repository or in the delivery ZIP.
+
+### Trained models
+
+The delivery ZIP includes the three checkpoints behind the results table, with their training logs:
+`runs/mini-lss/`, `runs/mini-cnn/` and `runs/mini-frozen/` (`best.pt`, ~31 MB each, and `log.csv`).
+With them the results can be reproduced without training (`scripts/evaluate.py`, see Usage).
+They are not in git.
 
 ## Usage
 

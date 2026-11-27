@@ -227,3 +227,6 @@ outputs/
 
 # Training runs (checkpoints and logs)
 runs/
+
+# Delivery ZIP
+entrega/
